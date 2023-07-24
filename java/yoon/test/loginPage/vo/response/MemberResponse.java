@@ -18,4 +18,5 @@ public class MemberResponse {
     private LocalDateTime regdate;
 
     private String role;
+
 }

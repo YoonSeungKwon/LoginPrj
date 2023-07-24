@@ -1,5 +1,6 @@
 package yoon.test.loginPage.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +15,7 @@ import yoon.test.loginPage.entity.Members;
 import yoon.test.loginPage.enums.Provider;
 import yoon.test.loginPage.enums.Role;
 import yoon.test.loginPage.repository.MemberRepository;
+import yoon.test.loginPage.security.jwt.JwtProvider;
 import yoon.test.loginPage.vo.request.MemberLoginRequest;
 import yoon.test.loginPage.vo.request.MemberRegisterRequest;
 import yoon.test.loginPage.vo.response.MemberResponse;
@@ -26,10 +28,14 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-
+    private final JwtProvider jwtProvider;
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private MemberResponse toResponse(Members member){
         return new MemberResponse(member.getIdx(), member.getEmail(), member.getName(), member.getRegdate(), member.getRoleKey());
+    }
+
+    public boolean checkEmailDuplication(String email){
+        return memberRepository.existsByEmail(email);
     }
 
     public MemberResponse saveMember(MemberRegisterRequest dto){
