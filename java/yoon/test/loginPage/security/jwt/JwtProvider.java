@@ -28,7 +28,7 @@ public class JwtProvider {
     private long exp_acc = 30 * 60 * 1000L;
     private long exp_ref = 3 * 60 * 60 * 1000L;
 
-    public String createAccessToken(MemberLoginRequest dto){
+    public String createAccessToken(String email){
 
         Claims claims = Jwts.claims()
                 .setIssuedAt(new Date())
@@ -38,13 +38,13 @@ public class JwtProvider {
                 .setHeaderParam("typ", "JWT_ACCESS_TOKEN")
                 .setHeaderParam("alg", "HS256")
                 .setClaims(claims)
-                .claim("email", dto.getEmail())
+                .claim("email", email)
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 
-    public String createRefreshToken(MemberLoginRequest dto){
-        Members member = memberRepository.findMembersByEmail(dto.getEmail());
+    public String createRefreshToken(String email){
+        Members member = memberRepository.findMembersByEmail(email);
         Claims claims = Jwts.claims()
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() +exp_ref));
@@ -62,7 +62,7 @@ public class JwtProvider {
     }
 
     public String getEmail(String token){
-        return (String)Jwts.parser().parseClaimsJwt(token).getBody().get("email");
+        return (String)Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().get("email");
     }
 
     public Authentication getAuthentication(String token){
@@ -74,15 +74,23 @@ public class JwtProvider {
 
     public boolean validateToken(String token){
         try{
-            Claims claims = Jwts.parser().parseClaimsJwt(token).getBody();
+            Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
             return !claims.getExpiration().before(new Date());
         }catch (Exception e){
+            System.out.println(e.getMessage());
             return false;
         }
     }
 
     public String resolveToken(HttpServletRequest request){
         String token  = request.getHeader("Authorization");
+        if(StringUtils.hasText(token) && token.startsWith("Bearer"))
+            return token.substring(7);
+        return null;
+    }
+
+    public String resolveRefreshToken(HttpServletRequest request){
+        String token  = request.getHeader("X-Refresh-Token");
         if(StringUtils.hasText(token) && token.startsWith("Bearer"))
             return token.substring(7);
         return null;

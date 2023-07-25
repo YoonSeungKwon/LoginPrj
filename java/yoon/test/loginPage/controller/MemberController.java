@@ -43,8 +43,8 @@ public class MemberController {
 
         MemberResponse result = memberService.loginMember(dto);
 
-        String acc_token = jwtProvider.createAccessToken(dto);
-        String ref_token = jwtProvider.createRefreshToken(dto);
+        String acc_token = jwtProvider.createAccessToken(dto.getEmail());
+        String ref_token = jwtProvider.createRefreshToken(dto.getEmail());
 
         response.setHeader("Authorization", acc_token);
         response.setHeader("X-Refresh-Token", ref_token);
