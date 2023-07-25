@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import yoon.test.loginPage.enums.ErrorCode;
+import yoon.test.loginPage.vo.response.ErrorResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,25 +22,26 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            filterChain.doFilter(request, response); // JwtAuthenticationFilter로 이동
+            filterChain.doFilter(request, response);
         } catch (JwtException ex) {
-            // JwtAuthenticationFilter에서 예외 발생하면 바로 setErrorResponse 호출
-            setErrorResponse(request, response, ex);
+            setErrorResponse(response, ex);
         }
     }
 
-    public void setErrorResponse(HttpServletRequest req, HttpServletResponse res, Throwable ex) throws IOException {
+    public void setErrorResponse(HttpServletResponse response, JwtException ex) throws IOException {
+        ErrorCode error;
+        if(ex.getMessage().equals(ErrorCode.ACCESS_TOKEN_EXPIRED.getCode())) {
+            error = ErrorCode.ACCESS_TOKEN_EXPIRED;
+        }
+        else {
+            error = ErrorCode.REFRESH_TOKEN_EXPIRED;
+        }
+        ErrorResponse errorResponse = new ErrorResponse(error.getCode(), error.getMessage());
+        response.setStatus(error.getStatus());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        final Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        body.put("error", "Unauthorized");
-        // ex.getMessage() 에는 jwtException을 발생시키면서 입력한 메세지가 들어있다.
-        body.put("message", ex.getMessage());
-        body.put("path", req.getServletPath());
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(res.getOutputStream(), body);
-        res.setStatus(HttpServletResponse.SC_OK);
+
+        mapper.writeValue(response.getOutputStream(), errorResponse);
     }
 }

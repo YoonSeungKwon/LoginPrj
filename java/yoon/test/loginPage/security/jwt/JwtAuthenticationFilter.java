@@ -1,26 +1,15 @@
 package yoon.test.loginPage.security.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.connector.Response;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.ClientAuthorizationRequiredException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.filter.OncePerRequestFilter;
 import yoon.test.loginPage.enums.ErrorCode;
-import yoon.test.loginPage.vo.response.ErrorResponse;
 
 import java.io.IOException;
 
@@ -30,18 +19,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String acc_token = jwtProvider.resolveToken(request);
-        if(acc_token!=null){
-            if(jwtProvider.validateToken(acc_token)) {
+
+        String acc_token = jwtProvider.resolveToken(request); //Access Token 헤더에서 가져오기
+
+        if(acc_token!=null && !acc_token.equals("null")){
+            if(jwtProvider.validateToken(acc_token)) {       //Access Token 검증
                 Authentication authentication = jwtProvider.getAuthentication(acc_token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-            String ref_token = jwtProvider.resolveRefreshToken(request);
-            if(ref_token == null)
-                throw new JwtException(acc_token);
-            if(jwtProvider.validateToken(ref_token)){
-                String email = jwtProvider.getEmail(acc_token);
-                System.out.println(email);
+            else{                                           //Access Token 기간 만료 Refresh Token 요청
+                String ref_token = jwtProvider.resolveRefreshToken(request);
+                if(ref_token == null)                       // 401에러를 보내서 Refresh Token 요청
+                    throw new JwtException(ErrorCode.ACCESS_TOKEN_EXPIRED.getCode());
+                if(jwtProvider.validateToken(ref_token)) {  // Refresh Token 검증
+                    String new_token = jwtProvider.updateToken(ref_token);  //새로운 Access Token 생성
+                    if (new_token != null) {
+                        response.setHeader("Authorization", new_token);
+                        Authentication authentication = jwtProvider.getAuthentication(new_token);
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
+                }else{                                       //Refresh Token 만료 예외처리
+                    throw new JwtException(ErrorCode.REFRESH_TOKEN_EXPIRED.getCode());
+                }
             }
         }
 

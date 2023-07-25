@@ -22,6 +22,11 @@ public enum ErrorCode {
     //DUPLICATION_ERROR
     EMAIL_DUPLICATION(400, "EMAIL_DUPLICATION", "이미 존재하는 이메일입니다."),
 
+    //JWT ERROR
+    ACCESS_TOKEN_EXPIRED(401, "TOKEN01", "엑세스 토큰이 만료되었습니다"),
+    REFRESH_TOKEN_EXPIRED(401, "TOKEN02", "리프레쉬 토큰이 만료되었습니다"),
+
+
     //AUTHORIZATION_ERROR
     AUTHORIZATION_INVALID1(403, "AUTHORIZATION_INVALID_01", "유저만 접근 가능합니다."),
     AUTHORIZATION_INVALID2(403, "AUTHORIZATION_INVALID_02", "관리자만 접급 가능합니다.");

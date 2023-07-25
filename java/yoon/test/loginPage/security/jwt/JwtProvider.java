@@ -95,4 +95,15 @@ public class JwtProvider {
             return token.substring(7);
         return null;
     }
+
+    public String updateToken(String ref_token){
+        try {
+            Members member = memberRepository.findMembersByRefreshToken(ref_token);
+            if(member == null)
+                return null;
+            return createAccessToken(member.getEmail());
+        }catch(Exception e){
+            return null;
+        }
+    }
 }
