@@ -1,0 +1,26 @@
+.form-form{
+    margin-top:50px;
+    width:300px;
+    height:200px;
+}
+
+.form-line{
+    width: 300px;
+    margin-top: 20px;
+}
+
+.form-span{
+    float:left;
+    font-weight: bold;
+}
+
+.form-input{
+    width:200px;
+    float:right;
+}
+
+.form-btn{
+    float:right;
+    margin-top:20px;
+}
+
