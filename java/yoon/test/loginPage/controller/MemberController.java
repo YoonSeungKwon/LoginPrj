@@ -27,7 +27,9 @@ public class MemberController {
     private final JwtProvider jwtProvider;
     @GetMapping("/check/{email}")
     public ResponseEntity<Boolean> checkEmailDuplication(@PathVariable String email){
-        return ResponseEntity.ok(memberService.checkEmailDuplication(email));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        return new ResponseEntity<>(memberService.checkEmailDuplication(email), headers, HttpStatus.OK);
     }
 
     @PostMapping("/join")
@@ -47,7 +49,7 @@ public class MemberController {
         String ref_token = jwtProvider.createRefreshToken(dto.getEmail());
 
         response.setHeader("Authorization", acc_token);
-        response.setHeader("X-Refresh-Token", ref_token);
+        response.setHeader("RefreshToken", ref_token);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

@@ -2,7 +2,6 @@ package yoon.test.loginPage.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +15,7 @@ public class UserController {
 
     private final MemberService memberService;
 
-    @GetMapping("/infos")
+    @GetMapping("/info")
     public ResponseEntity<?> getUserInfo(){
         MemberResponse result = memberService.getInfo();
         if(result == null)

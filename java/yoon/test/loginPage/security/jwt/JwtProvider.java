@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import yoon.test.loginPage.entity.Members;
 import yoon.test.loginPage.repository.MemberRepository;
-import yoon.test.loginPage.vo.request.MemberLoginRequest;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -90,7 +89,7 @@ public class JwtProvider {
     }
 
     public String resolveRefreshToken(HttpServletRequest request){
-        String token  = request.getHeader("X-Refresh-Token");
+        String token  = request.getHeader("RefreshToken");
         if(StringUtils.hasText(token) && token.startsWith("Bearer"))
             return token.substring(7);
         return null;

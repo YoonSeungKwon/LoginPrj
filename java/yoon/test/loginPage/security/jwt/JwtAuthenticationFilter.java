@@ -21,7 +21,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String acc_token = jwtProvider.resolveToken(request); //Access Token 헤더에서 가져오기
-
         if(acc_token!=null && !acc_token.equals("null")){
             if(jwtProvider.validateToken(acc_token)) {       //Access Token 검증
                 Authentication authentication = jwtProvider.getAuthentication(acc_token);
